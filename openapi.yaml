@@ -1,0 +1,216 @@
+openapi: 3.0.3
+info:
+  title: Nutrigrow API
+  version: 1.0.0
+  description: API untuk manajemen user dan child
+
+servers:
+  - url: http://localhost:8000/api
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: 08123456789
+        email:
+          type: string
+          example: user@mail.com
+
+    Child:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        age:
+          type: integer
+          example: 5
+        weight:
+          type: number
+          example: 18.5
+        height:
+          type: number
+          example: 110
+        muac:
+          type: number
+          example: 14.2
+        created_at:
+          type: string
+          format: date-time
+
+paths:
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  example: user@mail.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login success
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 1|asdasd123
+        "401":
+          description: Invalid credentials
+
+  /register:
+    post:
+      tags: [Auth]
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, phone, email, password]
+              properties:
+                name:
+                  type: string
+                  example: John Doe
+                phone:
+                  type: string
+                  example: 08123456789
+                email:
+                  type: string
+                  example: user@mail.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        "201":
+          description: Register success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Register success
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 1|asdasd123
+        "422":
+          description: Validation error
+
+  /children:
+    get:
+      tags: [Child]
+      summary: Get all children
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Success
+                  data:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Child'
+        "401":
+          description: Unauthenticated
+
+  /register-child:
+    post:
+      tags: [Child]
+      summary: Register child
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [age, weight, height, muac]
+              properties:
+                age:
+                  type: integer
+                  example: 5
+                weight:
+                  type: number
+                  example: 18.5
+                height:
+                  type: number
+                  example: 110
+                muac:
+                  type: number
+                  example: 14.2
+      responses:
+        "201":
+          description: Register success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Register success
+                  child:
+                    $ref: '#/components/schemas/Child'
+        "401":
+          description: Unauthenticated
+        "422":
+          description: Validation error
